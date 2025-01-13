@@ -15,6 +15,7 @@ module "secrets" {
     azurerm_private_endpoint.this,
     time_sleep.wait_for_rbac_before_secret_operations
   ]
+  
 }
 
 resource "time_sleep" "wait_for_rbac_before_secret_operations" {
