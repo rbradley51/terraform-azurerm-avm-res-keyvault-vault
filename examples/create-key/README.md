@@ -9,11 +9,12 @@ provider "azurerm" {
 }
 
 terraform {
-  required_version = "~> 1.9"
+  required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.71"
+      version = ">= 3.117"
     }
     http = {
       source  = "hashicorp/http"
@@ -62,13 +63,13 @@ data "azurerm_client_config" "current" {}
 
 module "key_vault" {
   source = "../../"
+
+  location = azurerm_resource_group.this.location
   # source             = "Azure/avm-res-keyvault-vault/azurerm"
-  name                          = module.naming.key_vault.name_unique
-  location                      = azurerm_resource_group.this.location
-  enable_telemetry              = var.enable_telemetry
-  resource_group_name           = azurerm_resource_group.this.name
-  tenant_id                     = data.azurerm_client_config.current.tenant_id
-  public_network_access_enabled = true
+  name                = module.naming.key_vault.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  enable_telemetry    = var.enable_telemetry
   keys = {
     cmk_for_storage_account = {
       key_opts = [
@@ -84,6 +85,11 @@ module "key_vault" {
       key_size = 2048
     }
   }
+  network_acls = {
+    bypass   = "AzureServices"
+    ip_rules = ["${data.http.ip.response_body}/32"]
+  }
+  public_network_access_enabled = true
   role_assignments = {
     deployment_user_kv_admin = {
       role_definition_id_or_name = "Key Vault Administrator"
@@ -93,10 +99,6 @@ module "key_vault" {
   wait_for_rbac_before_key_operations = {
     create = "60s"
   }
-  network_acls = {
-    bypass   = "AzureServices"
-    ip_rules = ["${data.http.ip.response_body}/32"]
-  }
 }
 ```
 
@@ -105,9 +107,9 @@ module "key_vault" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117)
 
 - <a name="requirement_http"></a> [http](#requirement\_http) (~> 3.4)
 

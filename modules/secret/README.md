@@ -7,11 +7,11 @@ Module to deploy key vault secrets in Azure.
 resource "azurerm_key_vault_secret" "this" {
   key_vault_id    = var.key_vault_resource_id
   name            = var.name
-  value           = var.value
   content_type    = var.content_type
   expiration_date = var.expiration_date
   not_before_date = var.not_before_date
   tags            = var.tags
+  value           = var.value
 }
 
 resource "azurerm_role_assignment" "this" {
@@ -34,15 +34,15 @@ resource "azurerm_role_assignment" "this" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117, < 5.0)
 
 ## Providers
 
 The following providers are used by this module:
 
-- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.71)
+- <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) (>= 3.117, < 5.0)
 
 ## Resources
 

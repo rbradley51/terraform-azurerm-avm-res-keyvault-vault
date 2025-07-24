@@ -9,11 +9,12 @@ provider "azurerm" {
 }
 
 terraform {
-  required_version = "~> 1.9"
+  required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.71"
+      version = ">= 3.117"
     }
     random = {
       source  = "hashicorp/random"
@@ -28,7 +29,7 @@ data "azurerm_client_config" "this" {}
 # This allows us to randomize the region for the resource group.
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.1.0"
+  version = "0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -52,19 +53,20 @@ resource "azurerm_resource_group" "this" {
 # This is the module call
 module "keyvault" {
   source = "../../"
+
+  location = azurerm_resource_group.this.location
   # source              = "Azure/avm-res-keyvault-vault/azurerm"
-  name                           = module.naming.key_vault.name_unique
-  enable_telemetry               = var.enable_telemetry
-  location                       = azurerm_resource_group.this.location
-  resource_group_name            = azurerm_resource_group.this.name
-  tenant_id                      = data.azurerm_client_config.this.tenant_id
-  legacy_access_policies_enabled = true
+  name                = module.naming.key_vault.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+  tenant_id           = data.azurerm_client_config.this.tenant_id
+  enable_telemetry    = var.enable_telemetry
   legacy_access_policies = {
     test = {
       object_id               = data.azurerm_client_config.this.object_id
       certificate_permissions = ["Get", "List"]
     }
   }
+  legacy_access_policies_enabled = true
 }
 ```
 
@@ -73,9 +75,9 @@ module "keyvault" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.71)
+- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (>= 3.117)
 
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
@@ -130,7 +132,7 @@ Version: 0.3.0
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: 0.1.0
+Version: 0.3.0
 
 <!-- markdownlint-disable-next-line MD041 -->
 ## Data Collection

@@ -1,9 +1,10 @@
 terraform {
-  required_version = "~> 1.9"
+  required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.71"
+      version = ">= 3.117"
     }
     random = {
       source  = "hashicorp/random"
@@ -22,7 +23,7 @@ data "azurerm_client_config" "this" {}
 # This allows us to randomize the region for the resource group.
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.1.0"
+  version = "0.3.0"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -45,10 +46,10 @@ resource "azurerm_resource_group" "this" {
 
 # A vnet is required for the private endpoint.
 resource "azurerm_virtual_network" "this" {
-  address_space       = ["192.168.0.0/24"]
   location            = azurerm_resource_group.this.location
   name                = module.naming.virtual_network.name_unique
   resource_group_name = azurerm_resource_group.this.name
+  address_space       = ["192.168.0.0/24"]
 }
 
 resource "azurerm_subnet" "this" {
@@ -66,19 +67,20 @@ resource "azurerm_private_dns_zone" "this" {
 # This is the module call
 module "keyvault" {
   source = "../../"
+
+  location = azurerm_resource_group.this.location
   # source             = "Azure/avm-res-keyvault-vault/azurerm"
-  name                          = module.naming.key_vault.name_unique
-  enable_telemetry              = var.enable_telemetry
-  location                      = azurerm_resource_group.this.location
-  resource_group_name           = azurerm_resource_group.this.name
-  tenant_id                     = data.azurerm_client_config.this.tenant_id
-  public_network_access_enabled = false
+  name                = module.naming.key_vault.name_unique
+  resource_group_name = azurerm_resource_group.this.name
+  tenant_id           = data.azurerm_client_config.this.tenant_id
+  enable_telemetry    = var.enable_telemetry
   private_endpoints = {
     primary = {
       private_dns_zone_resource_ids = [azurerm_private_dns_zone.this.id]
       subnet_resource_id            = azurerm_subnet.this.id
     }
   }
+  public_network_access_enabled = false
 }
 
 # Removed as this causes the idempotent check to fail.
